@@ -12,11 +12,12 @@
 
 ## 🛠️ Công nghệ sử dụng
 
-- ReactJS / Vite
-- Tailwind CSS (Responsive UI)
+- Flutter
+- Golang, C# (BackEnd)
 - Web3.js / Ethers.js
+- React/Vite (Web)
 - IPFS (nếu có)
-- Smart contract (Solidity) – tùy thuộc backend bạn triển khai
+- Smart contract (Solidity)
 
 ## 📦 Cài đặt
 
