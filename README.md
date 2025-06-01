@@ -23,5 +23,5 @@
 ```bash
 git clone https://github.com/<your-username>/CryStaPay.git
 cd CryStaPay
-npm install
-npm run dev
+flutter pob get
+flutter run -d <device_id>
