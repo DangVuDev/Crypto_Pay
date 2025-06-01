@@ -1,16 +1,27 @@
-# crystapay
+# CryStaPay
 
-A new Flutter project.
+**CryStaPay** là một ứng dụng DApp (Decentralized Application) hiện đại, đóng vai trò là cầu nối giữa các nền tảng blockchain khác nhau. Ứng dụng cho phép người dùng thực hiện các giao dịch nhanh chóng, an toàn và hiệu quả trong một giao diện thân thiện, responsive.
 
-## Getting Started
+## 🚀 Tính năng nổi bật
 
-This project is a starting point for a Flutter application.
+- 🔗 Kết nối nhiều nền tảng blockchain (Ethereum, BSC, Polygon, v.v.)
+- ⚡ Giao dịch tức thời với phí thấp
+- 🔐 Kết nối ví như MetaMask, WalletConnect
+- 🧠 Giao diện người dùng responsive, thân thiện trên mọi thiết bị
+- 📊 Xem lịch sử giao dịch, trạng thái mạng lưới
 
-A few resources to get you started if this is your first Flutter project:
+## 🛠️ Công nghệ sử dụng
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- ReactJS / Vite
+- Tailwind CSS (Responsive UI)
+- Web3.js / Ethers.js
+- IPFS (nếu có)
+- Smart contract (Solidity) – tùy thuộc backend bạn triển khai
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 📦 Cài đặt
+
+```bash
+git clone https://github.com/<your-username>/CryStaPay.git
+cd CryStaPay
+npm install
+npm run dev
