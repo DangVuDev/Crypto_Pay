@@ -6,6 +6,7 @@ import 'package:crysta_pay/src/presentation/screens/profile/profile_screen.dart'
 import 'package:crysta_pay/src/presentation/screens/receive/receive_screen.dart';
 import 'package:crysta_pay/src/presentation/screens/send/send_screen_v2.dart';
 import 'package:crysta_pay/src/presentation/screens/wallets/wallets_screen.dart';
+import 'package:crysta_pay/src/presentation/screens/wallets/wallets_screen_v1.dart';
 import 'package:crysta_pay/src/presentation/screens/auth/login_screen.dart';
 import 'package:crysta_pay/src/presentation/screens/auth/register_screen.dart';
 import 'package:crysta_pay/src/presentation/screens/introduce/splash_screen.dart';

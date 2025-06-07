@@ -7,7 +7,7 @@ class WalletState extends Equatable {
   final bool isSubmitting;
   final bool isRefreshing;
   final String? error;
-  
+
   const WalletState({
     this.wallets = const [],
     this.totalBalance = 0.0,
@@ -16,7 +16,7 @@ class WalletState extends Equatable {
     this.isRefreshing = false,
     this.error,
   });
-  
+
   WalletState copyWith({
     List<WalletModel>? wallets,
     double? totalBalance,
@@ -31,12 +31,17 @@ class WalletState extends Equatable {
       isLoading: isLoading ?? this.isLoading,
       isSubmitting: isSubmitting ?? this.isSubmitting,
       isRefreshing: isRefreshing ?? this.isRefreshing,
-      error: error,
+      error: error ?? this.error,
     );
   }
-  
+
   @override
   List<Object?> get props => [
-    wallets, totalBalance, isLoading, isSubmitting, isRefreshing, error
-  ];
+        wallets,
+        totalBalance,
+        isLoading,
+        isSubmitting,
+        isRefreshing,
+        error,
+      ];
 }

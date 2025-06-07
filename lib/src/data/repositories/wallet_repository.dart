@@ -1,152 +1,174 @@
-import 'dart:math';
-import 'package:crysta_pay/src/data/datasources/app_preferences.dart';
-import 'package:uuid/uuid.dart';
-
-import '../../core/utils/logger.dart';
+// lib/src/data/repositories/wallet_repository.dart
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 import '../models/wallet_model.dart';
 
-class WalletRepository {
-  final AppPreferences preferences;
-  static const String _walletsKey = 'user_wallets';
-  final _uuid = const Uuid();
-  
-  WalletRepository({
-    required this.preferences,
-  });
-  
-  Future<List<WalletModel>> getWallets() async {
-    try {
-      final walletsList = preferences.getObjectList(_walletsKey);
-      
-      if (walletsList == null || walletsList.isEmpty) {
-        // Generate sample wallets for demo
-        final sampleWallets = _generateSampleWallets();
-        await saveWallets(sampleWallets);
-        return sampleWallets;
-      }
-      
-      return walletsList.map((e) => WalletModel.fromJson(e)).toList();
-    } catch (e) {
-      AppLogger.error('Error getting wallets: $e');
-      return [];
+abstract class WalletRepository {
+  Future<List<WalletModel>> getAllWallets();
+  Future<WalletModel?> getWalletById(String id);
+  Future<void> saveWallet(WalletModel wallet);
+  Future<void> updateWallet(WalletModel wallet);
+  Future<void> deleteWallet(String id);
+  Future<void> clearAllWallets();
+}
+
+class WalletRepositoryImpl implements WalletRepository {
+  static const String _walletsKey = 'wallets';
+  late SharedPreferences _prefs;
+  bool _initialized = false;
+
+  WalletRepositoryImpl(){}
+
+  Future<void> _ensureInitialized() async {
+    if (!_initialized) {
+      _prefs = await SharedPreferences.getInstance();
+      _initialized = true;
     }
   }
-  
-  Future<bool> addWallet(WalletModel wallet) async {
+
+  @override
+  Future<List<WalletModel>> getAllWallets() async {
+    await _ensureInitialized();
+    
     try {
-      final wallets = await getWallets();
+      final walletsJson = _prefs.getStringList(_walletsKey) ?? [];
+      return walletsJson
+          .map((json) => WalletModel.fromJson(jsonDecode(json)))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to load wallets: $e');
+    }
+  }
+
+  @override
+  Future<WalletModel?> getWalletById(String id) async {
+    await _ensureInitialized();
+    
+    try {
+      final wallets = await getAllWallets();
+      return wallets.firstWhere(
+        (wallet) => wallet.id == id,
+        orElse: () => throw StateError('Wallet not found'),
+      );
+    } catch (e) {
+      return null;
+    }
+  }
+
+  @override
+  Future<void> saveWallet(WalletModel wallet) async {
+    await _ensureInitialized();
+    
+    try {
+      final wallets = await getAllWallets();
       
-      // Check if wallet with the same address already exists
-      if (wallets.any((w) => w.address.toLowerCase() == wallet.address.toLowerCase())) {
-        return false;
+      // Check if wallet already exists
+      final existingIndex = wallets.indexWhere((w) => w.id == wallet.id);
+      if (existingIndex != -1) {
+        throw Exception('Wallet with ID ${wallet.id} already exists');
       }
       
       wallets.add(wallet);
-      await saveWallets(wallets);
-      return true;
+      await _saveWallets(wallets);
     } catch (e) {
-      AppLogger.error('Error adding wallet: $e');
-      return false;
+      throw Exception('Failed to save wallet: $e');
     }
   }
-  
-  Future<bool> updateWallet(WalletModel wallet) async {
+
+  @override
+  Future<void> updateWallet(WalletModel wallet) async {
+    await _ensureInitialized();
+    
     try {
-      final wallets = await getWallets();
+      final wallets = await getAllWallets();
       final index = wallets.indexWhere((w) => w.id == wallet.id);
       
-      if (index == -1) return false;
-      
-      wallets[index] = wallet;
-      await saveWallets(wallets);
-      return true;
-    } catch (e) {
-      AppLogger.error('Error updating wallet: $e');
-      return false;
-    }
-  }
-  
-  Future<bool> deleteWallet(String walletId) async {
-    try {
-      final wallets = await getWallets();
-      final filteredWallets = wallets.where((w) => w.id != walletId).toList();
-      
-      if (wallets.length == filteredWallets.length) return false;
-      
-      await saveWallets(filteredWallets);
-      return true;
-    } catch (e) {
-      AppLogger.error('Error deleting wallet: $e');
-      return false;
-    }
-  }
-  
-  Future<void> saveWallets(List<WalletModel> wallets) async {
-    final walletJsonList = wallets.map((w) => w.toJson()).toList();
-    await preferences.setObjectList(_walletsKey, walletJsonList);
-  }
-  
-  List<WalletModel> _generateSampleWallets() {
-    final now = DateTime.now();
-    final rng = Random();
-    
-    return [
-      WalletModel(
-        id: _uuid.v4(),
-        name: 'Ví Ethereum',
-        address: '0x1234567890abcdef1234567890abcdef12345678',
-        type: CryptoType.eth,
-        balance: 0.5 + (rng.nextDouble() * 0.1),
-        usdValue: 1750.00 + (rng.nextDouble() * 100),
-        status: WalletStatus.active,
-        createdAt: now.subtract(const Duration(days: 30)),
-      ),
-      WalletModel(
-        id: _uuid.v4(),
-        name: 'Ví Bitcoin',
-        address: '1BoatSLRHtKNngkdXEeobR76b53LETtpyT',
-        type: CryptoType.btc,
-        balance: 0.02 + (rng.nextDouble() * 0.01),
-        usdValue: 1200.00 + (rng.nextDouble() * 100),
-        status: WalletStatus.locked,
-        createdAt: now.subtract(const Duration(days: 60)),
-      ),
-      WalletModel(
-        id: _uuid.v4(),
-        name: 'Ví USDT',
-        address: '0xabcdef1234567890abcdef1234567890abcdef12',
-        type: CryptoType.usdt,
-        balance: 500.0 + (rng.nextDouble() * 50),
-        usdValue: 500.00 + (rng.nextDouble() * 50),
-        status: WalletStatus.active,
-        createdAt: now.subtract(const Duration(days: 15)),
-      ),
-    ];
-  }
-  
-  Future<bool> refreshWalletBalances() async {
-    try {
-      final wallets = await getWallets();
-      final rng = Random();
-      
-      // Simulate balance updates
-      for (int i = 0; i < wallets.length; i++) {
-        final variation = rng.nextDouble() * 0.05 * (rng.nextBool() ? 1 : -1);
-        final newBalance = wallets[i].balance * (1 + variation);
-        final newUsdValue = wallets[i].usdValue * (1 + variation);
-        
-        wallets[i] = wallets[i].copyWith(
-          balance: newBalance,
-          usdValue: newUsdValue,
-          updatedAt: DateTime.now(),
-        );
+      if (index == -1) {
+        throw Exception('Wallet with ID ${wallet.id} not found');
       }
       
-      await saveWallets(wallets);
-      return true;
+      wallets[index] = wallet;
+      await _saveWallets(wallets);
     } catch (e) {
-      AppLogger.error('Error refreshing wallet balances: $e');
-      return false;
+      throw Exception('Failed to update wallet: $e');
     }
+  }
+
+  @override
+  Future<void> deleteWallet(String id) async {
+    await _ensureInitialized();
+    
+    try {
+      final wallets = await getAllWallets();
+      wallets.removeWhere((wallet) => wallet.id == id);
+      await _saveWallets(wallets);
+    } catch (e) {
+      throw Exception('Failed to delete wallet: $e');
+    }
+  }
+
+  @override
+  Future<void> clearAllWallets() async {
+    await _ensureInitialized();
+    
+    try {
+      await _prefs.remove(_walletsKey);
+    } catch (e) {
+      throw Exception('Failed to clear wallets: $e');
+    }
+  }
+
+  Future<void> _saveWallets(List<WalletModel> wallets) async {
+    try {
+      final walletsJson = wallets
+          .map((wallet) => jsonEncode(wallet.toJson()))
+          .toList();
+      await _prefs.setStringList(_walletsKey, walletsJson);
+    } catch (e) {
+      throw Exception('Failed to save wallets to storage: $e');
+    }
+  }
+
+  // Additional utility methods
+  Future<List<WalletModel>> getWalletsByType(CryptoType type) async {
+    final wallets = await getAllWallets();
+    return wallets.where((wallet) => wallet.type == type).toList();
+  }
+
+  Future<List<WalletModel>> getActiveWallets() async {
+    final wallets = await getAllWallets();
+    return wallets.where((wallet) => wallet.status == WalletStatus.active).toList();
+  }
+
+  Future<List<WalletModel>> getHardwareWallets() async {
+    final wallets = await getAllWallets();
+    return wallets.where((wallet) => wallet.isHardwareWallet).toList();
+  }
+
+  Future<double> getTotalUsdValue() async {
+    final wallets = await getAllWallets();
+    return wallets.fold<double>(0, (sum, wallet) => sum + wallet.usdValue);
+  }
+
+  Future<Map<CryptoType, int>> getWalletCountByType() async {
+    final wallets = await getAllWallets();
+    final Map<CryptoType, int> counts = {};
+    
+    for (final type in CryptoType.values) {
+      counts[type] = wallets.where((w) => w.type == type).length;
+    }
+    
+    return counts;
+  }
+
+  Future<bool> walletExistsByAddress(String address) async {
+    final wallets = await getAllWallets();
+    return wallets.any((wallet) => wallet.address.toLowerCase() == address.toLowerCase());
+  }
+
+  Future<List<WalletModel>> getRecentWallets({int limit = 5}) async {
+    final wallets = await getAllWallets();
+    wallets.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return wallets.take(limit).toList();
   }
 }

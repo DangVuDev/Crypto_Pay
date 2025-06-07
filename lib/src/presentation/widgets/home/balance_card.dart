@@ -1,3 +1,4 @@
+import 'package:crysta_pay/src/presentation/widgets/wallet/wallet_card.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 

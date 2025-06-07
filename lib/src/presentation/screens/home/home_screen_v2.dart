@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:crysta_pay/src/config/routes/route_names.dart';
+import 'package:crysta_pay/src/data/models/crypto_type_extension.dart';
 import 'package:crysta_pay/src/data/models/transaction_model.dart';
 import 'package:crysta_pay/src/data/models/wallet_model.dart';
 import 'package:flutter/material.dart';
@@ -27,69 +28,6 @@ class AppLocalizations {
 class AppLogger {
   static void debug(String message) => print('DEBUG: $message');
   static void info(String message) => print('INFO: $message');
-}
-
-
-extension CryptoTypeExtension on CryptoType {
-  String get displayName {
-    switch (this) {
-      case CryptoType.eth:
-        return 'Ethereum';
-      case CryptoType.btc:
-        return 'Bitcoin';
-      case CryptoType.usdt:
-        return 'USDT';
-      case CryptoType.sol:
-        return 'Solana';
-      case CryptoType.bnb:
-        return 'BNB';
-    }
-  }
-
-  String get symbol {
-    switch (this) {
-      case CryptoType.eth:
-        return 'ETH';
-      case CryptoType.btc:
-        return 'BTC';
-      case CryptoType.usdt:
-        return 'USDT';
-      case CryptoType.sol:
-        return 'SOL';
-      case CryptoType.bnb:
-        return 'BNB';
-    }
-  }
-
-  Color get color {
-    switch (this) {
-      case CryptoType.eth:
-        return const Color(0xFF627EEA);
-      case CryptoType.btc:
-        return const Color(0xFFF7931A);
-      case CryptoType.usdt:
-        return const Color(0xFF26A17B);
-      case CryptoType.sol:
-        return const Color(0xFF9945FF);
-      case CryptoType.bnb:
-        return const Color(0xFFF3BA2F);
-    }
-  }
-
-  IconData get icon {
-    switch (this) {
-      case CryptoType.eth:
-        return Icons.diamond;
-      case CryptoType.btc:
-        return Icons.currency_bitcoin;
-      case CryptoType.usdt:
-        return Icons.attach_money;
-      case CryptoType.sol:
-        return Icons.flash_on;
-      case CryptoType.bnb:
-        return Icons.token;
-    }
-  }
 }
 
 class HomeScreen extends StatefulWidget {
